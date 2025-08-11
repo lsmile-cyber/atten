@@ -1,105 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Editable Attendance</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-  }
-  table {
-    border-collapse: collapse;
-    width: 100%;
-    max-width: 900px;
-  }
-  td, th {
-    border: 1px solid #999;
-    padding: 8px;
-    text-align: center;
-  }
-  td[contenteditable="true"] {
-    background-color: #f0f8ff;
-    cursor: text;
-  }
-  button {
-    margin-top: 15px;
-    padding: 8px 16px;
-    font-size: 16px;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>Group 18 Attendance List</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { padding: 40px; }
+    h1 { margin-bottom: 30px; }
+    select { width: 100%; }
+  </style>
 </head>
-<body>
+<body class="container">
+  <h1>📋 IIMBA 23 Batch - Group 18 Attendance</h1>
 
-<h2>Attendance List</h2>
+  <table class="table table-bordered">
+    <thead class="table-light">
+      <tr>
+        <th>No.</th>
+        <th>Name</th>
+        <th>Roll No</th>
+        <th>MBA Code</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>Ma Nan Myint Htwe</td>
+        <td>IIMBA - 83</td>
+        <td>
+          <select>
+            <option>MBA-214</option>
+            <option>MBA-222</option>
+            <option>MBA-244</option>
+          </select>
+        </td>
+        <td>
+          <select>
+            <option>Present</option>
+            <option>Leave</option>
+            <option>Absent</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Ko Phyoe Wai Lin</td>
+        <td>IIMBA - 99</td>
+        <td>
+          <select>
+            <option>MBA-214</option>
+            <option>MBA-222</option>
+            <option>MBA-244</option>
+          </select>
+        </td>
+        <td>
+          <select>
+            <option>Present</option>
+            <option>Leave</option>
+            <option>Absent</option>
+          </select>
+        </td>
+      </tr>
+      <!-- Add more rows as needed -->
+    </tbody>
+  </table>
 
-<table id="attendanceTable">
-  <thead>
-    <tr>
-      <th>Employee</th>
-      <th contenteditable="false">2025-08-10</th>
-      <th contenteditable="false">2025-08-11</th>
-      <th contenteditable="false">2025-08-12</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td contenteditable="false">Alice</td>
-      <td contenteditable="true">P</td>
-      <td contenteditable="true">A</td>
-      <td contenteditable="true">P</td>
-    </tr>
-    <tr>
-      <td contenteditable="false">Bob</td>
-      <td contenteditable="true">A</td>
-      <td contenteditable="true">P</td>
-      <td contenteditable="true">P</td>
-    </tr>
-  </tbody>
-</table>
+  <button class="btn btn-primary" onclick="exportCSV()">Export to CSV</button>
 
-<button onclick="saveAttendance()">Save</button>
-<button onclick="loadAttendance()">Load</button>
+  <script>
+    // Save selections in local storage
+    document.querySelectorAll("select").forEach((select, index) => {
+      const key = `select-${index}`;
+      const saved = localStorage.getItem(key);
+      if (saved) select.value = saved;
+      select.addEventListener("change", () => {
+        localStorage.setItem(key, select.value);
+      });
+    });
 
-<script>
-  const tableId = 'attendanceTable';
+    // Export table to CSV
+    function exportCSV() {
+      let rows = [["No", "Name", "Roll No", "MBA Code", "Status"]];
+      document.querySelectorAll("table tbody tr").forEach(tr => {
+        const tds = tr.querySelectorAll("td");
+        const row = [
+          tds[0]?.innerText,
+          tds[1]?.innerText,
+          tds[2]?.innerText,
+          tds[3]?.querySelector("select")?.value,
+          tds[4]?.querySelector("select")?.value
+        ];
+        rows.push(row);
+      });
 
-  function saveAttendance() {
-    const table = document.getElementById(tableId);
-    const data = [];
-
-    for (let i = 1; i < table.rows.length; i++) {
-      const row = table.rows[i];
-      const rowData = [];
-      for (let j = 0; j < row.cells.length; j++) {
-        rowData.push(row.cells[j].innerText.trim());
-      }
-      data.push(rowData);
+      const csvContent = rows.map(e => e.join(",")).join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "attendance.csv";
+      link.click();
     }
-
-    localStorage.setItem('attendanceData', JSON.stringify(data));
-    alert('Attendance saved locally!');
-  }
-
-  function loadAttendance() {
-    const data = JSON.parse(localStorage.getItem('attendanceData'));
-    if (!data) return;
-
-    const table = document.getElementById(tableId);
-
-    for (let i = 0; i < data.length; i++) {
-      const row = table.rows[i + 1];
-      for (let j = 0; j < data[i].length; j++) {
-        row.cells[j].innerText = data[i][j];
-      }
-    }
-  }
-
-  window.onload = () => {
-    loadAttendance();
-  };
-</script>
-
+  </script>
 </body>
 </html>
